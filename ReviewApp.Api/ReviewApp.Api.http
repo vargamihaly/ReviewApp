@@ -1,0 +1,57 @@
+@ReviewApp_Api_HostAddress = https://localhost:7077
+
+### Get latest reviews
+GET {{ReviewApp_Api_HostAddress}}/api/reviews/test-product?limit=5
+Accept: application/json
+
+###
+
+### Submit a review
+POST {{ReviewApp_Api_HostAddress}}/api/reviews/test-product
+Content-Type: application/json
+Accept: application/json
+
+{
+  "content": "Amazing product!",
+  "latestFetchedReviewTimestampUtc": "2024-12-01T10:00:00Z"
+}
+
+### Get all products
+GET {{ReviewApp_Api_HostAddress}}/api/products
+Accept: application/json
+
+###
+
+### Check if product exists
+GET {{ReviewApp_Api_HostAddress}}/api/products/test-product
+Accept: application/json
+
+###
+
+### Create new product
+POST {{ReviewApp_Api_HostAddress}}/api/products
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Premium Headphones",
+  "description": "Noise-cancelling wireless headphones"
+}
+
+###
+
+### Update product
+PUT {{ReviewApp_Api_HostAddress}}/api/products/premium-headphones
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Updated noise-cancelling technology",
+  "archived": false
+}
+
+###
+
+### Delete product
+DELETE {{ReviewApp_Api_HostAddress}}/api/products/old-product
+Accept: application/json
