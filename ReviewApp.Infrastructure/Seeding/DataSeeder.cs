@@ -39,13 +39,22 @@ public class DataSeeder(IProductService productService, IReviewService reviewSer
     private async Task SeedSampleReviews()
     {
         var now = DateTimeOffset.UtcNow;
+
+        // Reviews are defined with sequential timestamps per product
         var sampleReviews = new[]
         {
-            new { Product = "Smartphone", Content = "Battery lasts for two days!", Timestamp = now.AddDays(-2) },
+            // Smartphone reviews (oldest first)
+            new { Product = "Smartphone", Content = "Good but battery could be better", Timestamp = now.AddDays(-5) },
+            new { Product = "Smartphone", Content = "Battery lasts for two days!", Timestamp = now.AddDays(-3) },
             new { Product = "Smartphone", Content = "Excellent screen resolution.", Timestamp = now.AddDays(-1) },
+            
+            // Laptop reviews (oldest first)
+            new { Product = "Laptop", Content = "Gets hot under heavy load", Timestamp = now.AddDays(-4) },
             new { Product = "Laptop", Content = "Boots up in seconds. Love it!", Timestamp = now.AddDays(-3) },
             new { Product = "Laptop", Content = "Keyboard feels premium.", Timestamp = now.AddDays(-2) },
-            new { Product = "Headphones", Content = "Perfect noise cancellation.", Timestamp = now.AddDays(-1) },
+            
+            // Other products with at least one review each
+            new { Product = "Headphones", Content = "Perfect noise cancellation.", Timestamp = now.AddDays(-2) },
             new { Product = "Smartwatch", Content = "Tracks my workouts accurately.", Timestamp = now.AddDays(-4) },
             new { Product = "Gaming Console", Content = "Smooth frame rates on all games.", Timestamp = now.AddDays(-3) },
             new { Product = "Bluetooth Speaker", Content = "Great bass and clarity.", Timestamp = now.AddDays(-5) },
@@ -55,12 +64,22 @@ public class DataSeeder(IProductService productService, IReviewService reviewSer
             new { Product = "Router", Content = "Wi-Fi coverage is excellent.", Timestamp = now.AddDays(-1) }
         };
 
-        foreach (var review in sampleReviews)
+        // Group by product and process in chronological order
+        var reviewsByProduct = sampleReviews
+            .GroupBy(r => r.Product)
+            .SelectMany(g => g.OrderBy(r => r.Timestamp));
+
+        foreach (var review in reviewsByProduct)
         {
+            // Get the latest existing review timestamp for this product
+            var latestReviews = await reviewService.GetLatestReviewsAsync(review.Product, 1);
+            var latestTimestamp = latestReviews.FirstOrDefault()?.CreatedAtUtc ?? DateTimeOffset.MinValue;
+
+            // Submit with the correct previous timestamp
             await reviewService.SubmitReviewAsync(
                 review.Product,
                 review.Content,
-                DateTimeOffset.MinValue);
+                latestTimestamp);
         }
     }
 }
